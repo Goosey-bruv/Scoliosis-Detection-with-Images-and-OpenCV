@@ -18,24 +18,49 @@ spine_type, display_degree = "Normal Spine", "0.00"
 text_color = (240, 240, 240)
 
 if len(vertebra_boxes) >= 6:
-    centers = sorted([[ (b.xyxy[0][0] + b.xyxy[0][2])/2, (b.xyxy[0][1] + b.xyxy[0][3])/2 ] 
-                     for b in vertebra_boxes], key=lambda x: x[1])
+    # FIX 1: Properly extract pure float numbers, not PyTorch Tensors
+    centers = []
+    for box in vertebra_boxes:
+        x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+        centers.append([(x1 + x2) / 2, (y1 + y2) / 2])
+        
+    centers = sorted(centers, key=lambda x: x[1])
     centers = np.array(centers)
     
     mid = len(centers) // 2
+    
+    # FIX 2: True Trigonometric Angle Calculation
     def get_deg(pts):
+        if len(pts) < 3: return 0.0
         s, e = pts[0], pts[-1]
+        
+        # Calculate maximum horizontal deviation
         devs = np.abs(np.cross(e-s, s-pts)) / np.linalg.norm(e-s)
-        return (np.max(devs) / (e[1] - s[1])) * 100
+        max_dev = np.max(devs)
+        
+        # Height of this specific spine segment
+        height = abs(e[1] - s[1])
+        if height == 0: return 0.0
+        
+        # True geometric angle using inverse tangent (arctan)
+        angle_rad = 2 * np.arctan(max_dev / (height / 2))
+        return np.degrees(angle_rad)
 
-    u_deg, l_deg = get_deg(centers[:mid+1]), get_deg(centers[mid:])
+    u_deg = get_deg(centers[:mid+1])
+    l_deg = get_deg(centers[mid:])
 
+    # Apply the 10-degree clinical threshold
     if u_deg > 10 and l_deg > 10:
-        spine_type, display_degree = "S-Curve (Double Major)", f"T:{u_deg:.1f} / L:{l_deg:.1f}"
+        spine_type = "S-Curve (Double Major)"
+        display_degree = f"T:{u_deg:.1f} / L:{l_deg:.1f}"
         text_color = (0, 215, 255)
     elif max(u_deg, l_deg) > 10:
         text_color = (0, 215, 255)
         spine_type = "Thoracic Scoliosis" if u_deg > l_deg else "Lumbar Scoliosis"
+        display_degree = f"{max(u_deg, l_deg):.2f}"
+    else:
+        # If both are under 10 degrees, it's a normal variation
+        spine_type = "Normal Spine"
         display_degree = f"{max(u_deg, l_deg):.2f}"
 
 # 4. FIX IMAGE RESOLUTION (ASPECT RATIO PRESERVATION)

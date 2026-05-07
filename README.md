@@ -41,19 +41,36 @@ A deep learning approach to automate the **Cobb Angle** calculation, which is th
 
 ## ⚙️ Installation & Setup
 
-### 1. Environment Configuration
+### 1. Clone the Repository
 
 ```bash
+   git clone [https://github.com/Goosey-bruv/Scoliosis-Detection-with-Images-and-OpenCV.git](https://github.com/Goosey-bruv/Scoliosis-Detection-with-Images-and-OpenCV.git)
+   cd Scoliosis-Detection-with-Images-and-OpenCV
+```
+
+### 2. Environment Configuration
+
 python -m venv venv
-.\venv\Scripts\activate
-pip install opencv-python mediapipe ultralytics scipy
-```
 
-### 2. Running the screening tool
+On Windows:
 
-```bash
-python posture_tracking/posture.py
-```
+venv\Scripts\activate
+
+On Mac/Linux:
+
+source venv/bin/activate
+
+### 3. Install the required dependencies
+
+pip install -r requirements.txt
+
+### 4. Run the Application
+
+uvicorn main:app
+
+### 5. Access the Interface
+
+Open your browser and navigate to <http://127.0.0.1:8000> to view the dashboard!
 
 ---
 

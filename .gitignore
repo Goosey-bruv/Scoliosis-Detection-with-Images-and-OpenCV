@@ -1,7 +1,6 @@
 venv/
 __pycache__/
-runs/
-*.pt
-salmankey/
 *.jpg
 *.png
+patients.db
+patients.db-journal

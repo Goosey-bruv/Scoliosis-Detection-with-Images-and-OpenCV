@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoliosis Medical Suite</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --bg: #f8f9fa; --card: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: #333; margin: 0; padding: 40px 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--primary); margin-bottom: 40px; font-weight: 300; letter-spacing: 1px; }
+        
+        /* Tab System */
+        .tabs { display: flex; justify-content: center; margin-bottom: 30px; gap: 10px; }
+        .tab-btn { background: #e0e0e0; border: none; padding: 12px 30px; font-size: 16px; border-radius: 30px; cursor: pointer; transition: 0.3s; font-weight: 600; color: #555; }
+        .tab-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); }
+        .tab-content { display: none; background: var(--card); padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        
+        /* X-Ray Section */
+        .upload-area { text-align: center; padding: 40px; border: 2px dashed #bdc3c7; border-radius: 10px; margin-bottom: 30px; background: #fafafa; }
+        .upload-area input { margin-bottom: 15px; }
+        .btn { background: var(--accent); color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: #2980b9; }
+        
+        .results-container { display: none; display: flex; gap: 30px; margin-top: 20px; }
+        .image-panel { flex: 2; text-align: center; background: #000; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .image-panel img { max-width: 100%; max-height: 500px; }
+        .data-panel { flex: 1; background: var(--primary); color: white; padding: 30px; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; }
+        .data-panel h2 { font-size: 14px; color: #bdc3c7; text-transform: uppercase; margin: 0 0 5px 0; }
+        .data-value { font-size: 28px; font-weight: bold; color: #f1c40f; margin-bottom: 25px; }
+
+        /* Video Section */
+        .video-container { text-align: center; background: #000; border-radius: 15px; overflow: hidden; padding: 0; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .video-controls { text-align: center; margin-top: 20px; }
+
+        /* Camera Placeholder State */
+        #cameraPlaceholder { 
+            padding: 80px 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            background: #1a1e21; 
+            height: 350px;
+        }
+        #cameraPlaceholder h3 { margin: 15px 0 5px 0; color: #ecf0f1; font-weight: 500;}
+        .warning-box { 
+            color: #f39c12; 
+            font-size: 14px; 
+            max-width: 450px; 
+            line-height: 1.5; 
+            margin-top: 15px; 
+            border: 1px solid rgba(243, 156, 18, 0.3); 
+            background: rgba(243, 156, 18, 0.05); 
+            padding: 12px 20px; 
+            border-radius: 8px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Scoliosis Diagnostic Suite</h1>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('xray')">X-Ray Analyzer</button>
+        <button class="tab-btn" onclick="switchTab('tracker')">Live Posture Tracker</button>
+    </div>
+
+    <div id="xray" class="tab-content active">
+        <div class="upload-area">
+            <input type="file" id="fileInput" accept="image/*"><br>
+            <button class="btn" onclick="uploadImage()">Analyze Scan</button>
+            <p id="statusText" style="margin-top: 15px; color: #7f8c8d; font-weight: 500;"></p>
+        </div>
+
+        <div class="results-container" id="resultsArea" style="display: none;">
+            <div class="image-panel"><img id="resultImage" src="" alt="Analyzed X-Ray"></div>
+            <div class="data-panel">
+                <h2>Clinical Diagnosis</h2>
+                <div class="data-value" id="diagText">--</div>
+                <h2>Cobb Angle</h2>
+                <div class="data-value" id="cobbText">-- DEG</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tracker" class="tab-content">
+        <div class="video-container" id="videoContainer">
+            <div id="cameraPlaceholder">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#7f8c8d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <h3>Camera Offline</h3>
+                <div class="warning-box">
+                    <strong>⚠️ Preparation Required:</strong><br>
+                    For the AI to accurately map your spine and shoulders, please wear form-fitting clothing or ensure a bare torso. Baggy clothes will result in false readings.
+                </div>
+            </div>
+            
+            <img id="videoStream" src="" style="display: none; width: 100%; max-width: 800px; margin: 0 auto;">
+        </div>
+        <div class="video-controls">
+            <button class="btn" id="camBtn" onclick="toggleCamera()">Start Camera</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- UI Logic ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+        
+        // Auto-stop camera if leaving the tracker tab
+        if (tabId !== 'tracker' && isCameraRunning) toggleCamera();
+    }
+
+    // --- X-Ray Logic ---
+    async function uploadImage() {
+        const fileInput = document.getElementById('fileInput');
+        const statusText = document.getElementById('statusText');
+        const resultsArea = document.getElementById('resultsArea');
+        
+        if (fileInput.files.length === 0) return alert("Select an image first!");
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        statusText.innerText = "Processing via AI... Please wait.";
+        statusText.style.color = "#7f8c8d";
+        resultsArea.style.display = 'none';
+
+        try {
+            const response = await fetch("http://127.0.0.1:8000/analyze-xray/", { method: "POST", body: formData });
+            const data = await response.json();
+            
+            if (response.ok) {
+                document.getElementById('diagText').innerText = data.diagnosis;
+                document.getElementById('cobbText').innerText = data.cobb_angle + " DEG";
+                document.getElementById('resultImage').src = "data:image/jpeg;base64," + data.image_data;
+                resultsArea.style.display = 'flex';
+                statusText.innerText = "Analysis Complete.";
+            } else {
+                statusText.innerText = "❌ Error: " + data.detail;
+                statusText.style.color = "#e74c3c";
+            }
+        } catch (error) {
+            statusText.innerText = "Error: API Offline. Is Uvicorn running?";
+        }
+    }
+
+    // --- WebCam Stream Logic ---
+    let isCameraRunning = false;
+    function toggleCamera() {
+        const streamImg = document.getElementById('videoStream');
+        const placeholder = document.getElementById('cameraPlaceholder');
+        const camBtn = document.getElementById('camBtn');
+
+        if (!isCameraRunning) {
+            // Hide placeholder, show video
+            placeholder.style.display = 'none';
+            streamImg.style.display = 'block';
+            streamImg.src = "http://127.0.0.1:8000/video-feed/";
+            
+            camBtn.innerText = "Stop Camera";
+            camBtn.style.background = "#e74c3c";
+            isCameraRunning = true;
+        } else {
+            // Hide video, show placeholder
+            streamImg.src = "";
+            streamImg.style.display = 'none';
+            placeholder.style.display = 'flex';
+            
+            camBtn.innerText = "Start Camera";
+            camBtn.style.background = "var(--accent)";
+            isCameraRunning = false;
+        }
+    }
+</script>
+
+</body>
+</html>
